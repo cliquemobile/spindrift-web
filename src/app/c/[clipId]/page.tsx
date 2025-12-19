@@ -30,9 +30,34 @@ interface ClipData {
   available_resolutions: string | null;
   view_count: number;
   profiles: {
-    username: string;
-    avatar_url: string;
+    username: string | null;
+    lounge_username: string | null;
+    avatar_url: string | null;
   } | null;
+}
+
+/**
+ * Get display string for the clip author
+ * - If both username and lounge_username exist: "@username (lounge_username)"
+ * - If only username: "@username"
+ * - If only lounge_username: "lounge_username"
+ * - If neither: null (don't display)
+ */
+function getAuthorDisplay(profiles: ClipData['profiles']): string | null {
+  if (!profiles) return null;
+
+  const { username, lounge_username } = profiles;
+
+  if (username && lounge_username) {
+    return `@${username} (${lounge_username})`;
+  }
+  if (username) {
+    return `@${username}`;
+  }
+  if (lounge_username) {
+    return lounge_username;
+  }
+  return null;
 }
 
 async function getClip(clipId: string): Promise<ClipData | null> {
@@ -40,7 +65,7 @@ async function getClip(clipId: string): Promise<ClipData | null> {
     .from('clips')
     .select(`
       id, title, bunny_video_id, encoding_status, available_resolutions, view_count,
-      profiles!clips_user_id_fkey ( username, avatar_url )
+      profiles ( username, lounge_username, avatar_url )
     `)
     .eq('id', clipId)
     .single();
@@ -93,9 +118,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Clip Not Found - Spindrift' };
   }
 
-  const username = clip.profiles?.username || 'Unknown';
-  const title = clip.title || `Clip by @${username}`;
-  const description = `Watch this Rocket League clip by @${username} on Spindrift`;
+  const authorDisplay = getAuthorDisplay(clip.profiles);
+  const title = clip.title || (authorDisplay ? `Clip by ${authorDisplay}` : 'Clip on Spindrift');
+  const description = authorDisplay
+    ? `Watch this clip by ${authorDisplay} on Spindrift`
+    : 'Watch this clip on Spindrift';
   const clipUrl = `https://clips.spindrift.pro/c/${clip.id}`;
   const thumbnailUrl = getThumbnailUrl(clip.bunny_video_id);
   const videoUrl = getBestMp4Url(clip.bunny_video_id, clip.available_resolutions);
@@ -147,7 +174,7 @@ export default async function ClipPage({ params }: Props) {
     notFound();
   }
 
-  const username = clip.profiles?.username || 'Unknown';
+  const authorDisplay = getAuthorDisplay(clip.profiles);
   const thumbnailUrl = getThumbnailUrl(clip.bunny_video_id);
   const deepLink = `spindrift://(tabs)/home/clip-detail?clipId=${clip.id}`;
 
@@ -163,7 +190,7 @@ export default async function ClipPage({ params }: Props) {
           </div>
         </div>
         <h1 style={styles.title}>{clip.title || 'Untitled Clip'}</h1>
-        <p style={styles.username}>by @{username}</p>
+        {authorDisplay && <p style={styles.username}>by {authorDisplay}</p>}
       </main>
     );
   }
@@ -210,17 +237,10 @@ export default async function ClipPage({ params }: Props) {
       {/* Clip Info */}
       <div style={styles.infoContainer}>
         <h1 style={styles.title}>{clip.title || 'Untitled Clip'}</h1>
-        <p style={styles.username}>by @{username}</p>
+        {authorDisplay && <p style={styles.username}>by {authorDisplay}</p>}
         <p style={styles.views}>{clip.view_count?.toLocaleString() || 0} views</p>
       </div>
 
-      {/* App Download CTA */}
-      <div style={styles.ctaContainer}>
-        <a href={TESTFLIGHT_URL} style={styles.ctaButton}>
-          Get Spindrift on iOS
-        </a>
-        <p style={styles.androidText}>Android coming soon</p>
-      </div>
     </main>
   );
 }
