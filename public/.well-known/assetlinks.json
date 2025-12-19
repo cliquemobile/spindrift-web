@@ -5,7 +5,7 @@
       "namespace": "android_app",
       "package_name": "com.yourcompany.yourapp",
       "sha256_cert_fingerprints": [
-        "TODO_GET_FROM_EAS_CREDENTIALS"
+        "YOUR_ANDROID_SHA256_FINGERPRINT"
       ]
     }
   }
