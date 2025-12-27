@@ -90,7 +90,8 @@ async function getClip(clipId: string): Promise<ClipData | null> {
 
 function getBestMp4Url(bunnyVideoId: string, availableResolutions: string | null): string {
   const resolutions = availableResolutions?.split(',') || [];
-  const preferred = ['1080p', '720p', '480p', '360p'];
+  // Note: Bunny MP4 files only go up to 720p (HLS supports higher resolutions)
+  const preferred = ['720p', '480p', '360p'];
 
   for (const res of preferred) {
     if (resolutions.includes(res)) {
