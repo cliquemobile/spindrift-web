@@ -19,8 +19,8 @@ function getSupabase(): SupabaseClient {
   return supabase;
 }
 
-const BUNNY_CDN = 'your-bunny-cdn-host.b-cdn.net';
-const TESTFLIGHT_URL = 'https://testflight.apple.com/join/your-code';
+const BUNNY_CDN = process.env.BUNNY_CDN_HOST!;
+const TESTFLIGHT_URL = process.env.TESTFLIGHT_URL!;
 
 interface ClipData {
   id: string;

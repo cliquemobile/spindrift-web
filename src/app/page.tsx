@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-const TESTFLIGHT_URL = 'https://testflight.apple.com/join/your-code';
+const TESTFLIGHT_URL = process.env.TESTFLIGHT_URL!;
 
 export default function Home() {
   // Redirect to TestFlight for now

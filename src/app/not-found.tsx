@@ -1,4 +1,4 @@
-const TESTFLIGHT_URL = 'https://testflight.apple.com/join/your-code';
+const TESTFLIGHT_URL = process.env.TESTFLIGHT_URL!;
 
 export default function NotFound() {
   return (
